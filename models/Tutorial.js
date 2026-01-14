@@ -24,7 +24,6 @@ const tutorialSchema = new mongoose.Schema(
     },
     videoId: {
       type: String,
-      required: true,
     },
     thumbnail: {
       type: String,
@@ -56,23 +55,54 @@ const tutorialSchema = new mongoose.Schema(
 );
 
 // Extract video ID from YouTube URL before saving
-tutorialSchema.pre("save", function (next) {
-  if (this.isModified("youtubeUrl")) {
-    const urlPatterns = [
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
-      /youtube\.com\/embed\/([^&\s]+)/,
-    ];
+// tutorialSchema.pre("save", function (next) {
+//   if (this.isModified("youtubeUrl")) {
+//     const urlPatterns = [
+//       /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
+//       /youtube\.com\/embed\/([^&\s]+)/,
+//     ];
 
-    for (const pattern of urlPatterns) {
-      const match = this.youtubeUrl.match(pattern);
-      if (match && match[1]) {
-        this.videoId = match[1];
-        this.thumbnail = `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg`;
-        break;
-      }
+//     for (const pattern of urlPatterns) {
+//       const match = this.youtubeUrl.match(pattern);
+//       if (match && match[1]) {
+//         this.videoId = match[1];
+//         this.thumbnail = `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg`;
+//         break;
+//       }
+//     }
+//   }
+//   next();
+// });
+
+tutorialSchema.pre("save", function () {
+  if (!this.youtubeUrl) {
+    return next(new Error("YouTube URL is required"));
+  }
+
+  const urlPatterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/,
+    /youtube\.com\/embed\/([^&\s]+)/,
+    /youtube\.com\/shorts\/([^&\s]+)/,
+  ];
+
+  let videoId = null;
+
+  for (const pattern of urlPatterns) {
+    const match = this.youtubeUrl.match(pattern);
+    if (match && match[1]) {
+      videoId = match[1];
+      break;
     }
   }
-  next();
+
+  if (!videoId) {
+    return next(new Error("Invalid YouTube URL"));
+  }
+
+  this.videoId = videoId;
+  this.thumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+  return;
 });
 
 module.exports = mongoose.model("Tutorial", tutorialSchema);
