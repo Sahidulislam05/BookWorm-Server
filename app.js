@@ -30,7 +30,7 @@ app.use(
   })
 );
 
-// Routes
+// Import Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/books", require("./routes/books"));
 app.use("/api/genres", require("./routes/genres"));
