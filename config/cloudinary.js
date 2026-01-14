@@ -6,7 +6,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Setup Cloudinary
+// Setup Cloudinary (Backend)
 
 // Upload image to cloudinary
 const uploadToCloudinary = async (file, folder = "bookworm") => {
