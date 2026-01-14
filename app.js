@@ -2,7 +2,6 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
-const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 
 // Load env vars
@@ -10,7 +9,6 @@ dotenv.config();
 const app = express();
 
 // Connect to database
-connectDB();
 
 // Middleware
 app.use(express.json());
