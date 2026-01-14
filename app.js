@@ -6,6 +6,7 @@ const errorHandler = require("./middleware/errorHandler");
 
 // Load env vars
 dotenv.config();
+const connectDB = require("./config/db");
 const app = express();
 
 // Connect to database
@@ -51,16 +52,26 @@ app.get("/", (req, res) => {
 // Error handler
 app.use(errorHandler);
 
-// const PORT = process.env.PORT || 5000;
-// const server = app.listen(PORT, () => {
-//   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-// });
+const PORT = process.env.PORT || 5000;
+let server;
+connectDB()
+  .then(() => {
+    server = app.listen(PORT, () => {
+      console.log(
+        `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
+      );
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to connect to DB:", err.message);
+    process.exit(1);
+  });
 
 module.exports = app;
 
 // Handle unhandled promise rejections
 
-// process.on("unhandledRejection", (err, promise) => {
-//   console.log(`Error: ${err.message}`);
-//   server.close(() => process.exit(1));
-// });
+process.on("unhandledRejection", (err, promise) => {
+  console.log(`Error: ${err.message}`);
+  server.close(() => process.exit(1));
+});
